@@ -361,7 +361,7 @@
 >>1	regex/c		\^([^\xd>]*|.*\.hlp)	MS Windows help file Content, based "%s"
 !:mime	text/plain
 !:apple	????TEXT
-!:ext	cnt
+!:ext	cnt/hlp
 #
 # Windows creates a full text search from hlp file, if the user clicks the "Find" tab and enables keyword indexing
 0	string		tfMR			MS Windows help Full Text Search index
@@ -543,6 +543,7 @@
 # .ShellClassInfo DeleteOnCopy LocalizedFileNames ASCII coded case-independent
 >>&0	regex/c	\^(\.ShellClassInfo|DeleteOnCopy|LocalizedFileNames)]	Windows desktop.ini
 !:mime application/x-wine-extension-ini
+!:ext ini
 #!:mime text/plain
 # https://support.microsoft.com/kb/84709/
 >>&0	regex/c		\^(don't\ load)]				Windows CONTROL.INI

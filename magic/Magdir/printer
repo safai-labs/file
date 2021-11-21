@@ -8,6 +8,7 @@
 0	string		%!		PostScript document text
 !:mime	application/postscript
 !:apple	ASPSTEXT
+!:ext ps
 >2	string		PS-Adobe-	conforming
 >>11	string		>\0		DSC level %.3s
 >>>15	string		EPS		\b, type %s
@@ -19,6 +20,7 @@
 0	string		\004%!		PostScript document text
 !:mime	application/postscript
 !:apple	ASPSTEXT
+!:ext ps/postscript/ppd
 >3	string		PS-Adobe-	conforming
 >>12	string		>\0		DSC level %.3s
 >>>16	string		EPS		\b, type %s
@@ -43,6 +45,7 @@
 # Reference: https://partners.adobe.com/public/developer/en/ps/5003.PPD_Spec_v4.3.pdf, Section 3.8
 # Submitted by: Yves Arrouye <arrouye@marin.fdn.fr>
 #
+!:ext ppd/ps/postscript
 0	string		*PPD-Adobe:\x20	PPD file
 >&0	string		x		\b, version %s
 
