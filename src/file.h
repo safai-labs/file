@@ -27,7 +27,7 @@
  */
 /*
  * file.h - definitions for file(1) program
- * @(#)$File: file.h,v 1.228 2021/10/24 15:52:18 christos Exp $
+ * @(#)$File: file.h,v 1.235 2022/07/04 19:44:35 christos Exp $
  */
 
 #ifndef __file_h__
@@ -88,6 +88,10 @@
 /* Do this here and now, because struct stat gets re-defined on solaris */
 #include <sys/stat.h>
 #include <stdarg.h>
+#include <locale.h>
+#if defined(HAVE_XLOCALE_H)
+#include <xlocale.h>
+#endif
 
 #define ENABLE_CONDITIONALS
 
@@ -166,6 +170,8 @@
 #define FILE_CHECK	1
 #define FILE_COMPILE	2
 #define FILE_LIST	3
+
+typedef regex_t file_regex_t;
 
 struct buffer {
 	int fd;
@@ -404,7 +410,8 @@ struct magic {
 /* list of magic entries */
 struct mlist {
 	struct magic *magic;		/* array of magic entries */
-	uint32_t nmagic;		/* number of entries in array */
+	file_regex_t **magic_rxcomp;	/* array of compiled regexps */
+	size_t nmagic;			/* number of entries in array */
 	void *map;			/* internal resources used by entry */
 	struct mlist *next, *prev;
 };
@@ -483,6 +490,13 @@ struct magic_set {
 #define	FILE_NAME_MAX			50
 #define	FILE_REGEX_MAX			8192
 #define	FILE_ENCODING_MAX		(64 * 1024)
+#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
+#define USE_C_LOCALE
+	locale_t c_lc_ctype;
+#define file_locale_used
+#else
+#define file_locale_used __attribute__((__unused__))
+#endif
 };
 
 /* Type for Unicode characters */
@@ -551,7 +565,7 @@ protected void file_magwarn(struct magic_set *, const char *, ...)
     __attribute__((__format__(__printf__, 2, 3)));
 protected void file_mdump(struct magic *);
 protected void file_showstr(FILE *, const char *, size_t);
-protected size_t file_mbswidth(const char *);
+protected size_t file_mbswidth(struct magic_set *, const char *);
 protected const char *file_getbuffer(struct magic_set *);
 protected ssize_t sread(int, void *, size_t, int);
 protected int file_check_mem(struct magic_set *, unsigned int);
@@ -576,29 +590,13 @@ protected void buffer_init(struct buffer *, int, const struct stat *,
 protected void buffer_fini(struct buffer *);
 protected int buffer_fill(const struct buffer *);
 
-#include <locale.h>
-#if defined(HAVE_XLOCALE_H)
-#include <xlocale.h>
-#endif
 
-typedef struct {
-	const char *pat;
-#if defined(HAVE_NEWLOCALE) && defined(HAVE_USELOCALE) && defined(HAVE_FREELOCALE)
-#define USE_C_LOCALE
-	locale_t old_lc_ctype;
-	locale_t c_lc_ctype;
-#else
-	char *old_lc_ctype;
-#endif
-	int rc;
-	regex_t rx;
-} file_regex_t;
 
-protected int file_regcomp(file_regex_t *, const char *, int);
-protected int file_regexec(file_regex_t *, const char *, size_t, regmatch_t *,
+protected int file_regcomp(struct magic_set *, file_regex_t *, const char *,
     int);
+protected int file_regexec(struct magic_set *, file_regex_t *, const char *,
+    size_t, regmatch_t *, int);
 protected void file_regfree(file_regex_t *);
-protected void file_regerror(file_regex_t *, int, struct magic_set *);
 
 typedef struct {
 	char *buf;

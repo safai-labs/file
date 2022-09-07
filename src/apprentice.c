@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apprentice.c,v 1.315 2021/10/28 16:15:14 christos Exp $")
+FILE_RCSID("@(#)$File: apprentice.c,v 1.324 2022/05/31 18:54:25 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -120,7 +120,8 @@ private int parse(struct magic_set *, struct magic_entry *, const char *,
     size_t, int);
 private void eatsize(const char **);
 private int apprentice_1(struct magic_set *, const char *, int);
-private size_t apprentice_magic_strength(const struct magic *);
+private ssize_t apprentice_magic_strength_1(const struct magic *);
+private size_t apprentice_magic_strength(const struct magic *, size_t);
 private int apprentice_sort(const void *, const void *);
 private void apprentice_list(struct mlist *, int );
 private struct magic_map *apprentice_load(struct magic_set *,
@@ -449,7 +450,15 @@ add_mlist(struct mlist *mlp, struct magic_map *map, size_t idx)
 	ml->map = idx == 0 ? map : NULL;
 	ml->magic = map->magic[idx];
 	ml->nmagic = map->nmagic[idx];
-
+	if (ml->nmagic) {
+		ml->magic_rxcomp = CAST(file_regex_t **,
+		    calloc(ml->nmagic, sizeof(*ml->magic_rxcomp)));
+		if (ml->magic_rxcomp == NULL) {
+			free(ml);
+			return -1;
+		}
+	} else
+		ml->magic_rxcomp = NULL;
 	mlp->prev->next = ml;
 	ml->prev = mlp->prev;
 	ml->next = mlp;
@@ -531,6 +540,9 @@ file_ms_free(struct magic_set *ms)
 	free(ms->o.pbuf);
 	free(ms->o.buf);
 	free(ms->c.li);
+#ifdef USE_C_LOCALE
+	freelocale(ms->c_lc_ctype);
+#endif
 	free(ms);
 }
 
@@ -570,6 +582,10 @@ file_ms_alloc(int flags)
 	ms->regex_max = FILE_REGEX_MAX;
 	ms->bytes_max = FILE_BYTES_MAX;
 	ms->encoding_max = FILE_ENCODING_MAX;
+#ifdef USE_C_LOCALE
+	ms->c_lc_ctype = newlocale(LC_CTYPE_MASK, "C", 0);
+	assert(ms->c_lc_ctype != NULL);
+#endif
 	return ms;
 free:
 	free(ms);
@@ -604,6 +620,7 @@ apprentice_unmap(struct magic_map *map)
 		break;
 #endif
 	default:
+		fprintf(stderr, "Bad map type %d", map->type);
 		abort();
 	}
 	free(map);
@@ -634,8 +651,20 @@ mlist_free_all(struct magic_set *ms)
 private void
 mlist_free_one(struct mlist *ml)
 {
+	size_t i;
+
 	if (ml->map)
 		apprentice_unmap(CAST(struct magic_map *, ml->map));
+
+	for (i = 0; i < ml->nmagic; ++i) {
+		if (ml->magic_rxcomp[i]) {
+			file_regfree(ml->magic_rxcomp[i]);
+			free(ml->magic_rxcomp[i]);
+			ml->magic_rxcomp[i] = NULL;
+		}
+	}
+	free(ml->magic_rxcomp);
+	ml->magic_rxcomp = NULL;
 	free(ml);
 }
 
@@ -735,7 +764,7 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 	fn = mfn;
 
 	while (fn) {
-		p = strchr(fn, PATHSEP);
+		p = CCAST(char *, strchr(fn, PATHSEP));
 		if (p)
 			*p++ = '\0';
 		if (*fn == '\0')
@@ -866,6 +895,8 @@ typesize(int type)
 	case FILE_FLOAT:
 	case FILE_BEFLOAT:
 	case FILE_LEFLOAT:
+	case FILE_BEID3:
+	case FILE_LEID3:
 		return 4;
 
 	case FILE_QUAD:
@@ -899,8 +930,8 @@ typesize(int type)
 /*
  * Get weight of this magic entry, for sorting purposes.
  */
-private size_t
-apprentice_magic_strength(const struct magic *m)
+private ssize_t
+apprentice_magic_strength_1(const struct magic *m)
 {
 #define MULT 10U
 	size_t ts, v;
@@ -908,8 +939,10 @@ apprentice_magic_strength(const struct magic *m)
 
 	switch (m->type) {
 	case FILE_DEFAULT:	/* make sure this sorts last */
-		if (m->factor_op != FILE_FACTOR_OP_NONE)
+		if (m->factor_op != FILE_FACTOR_OP_NONE) {
+			fprintf(stderr, "Bad factor_op %d", m->factor_op);
 			abort();
+		}
 		return 0;
 
 	case FILE_BYTE:
@@ -949,6 +982,8 @@ apprentice_magic_strength(const struct magic *m)
 	case FILE_BEVARINT:
 	case FILE_LEVARINT:
 	case FILE_GUID:
+	case FILE_BEID3:
+	case FILE_LEID3:
 	case FILE_OFFSET:
 	case FILE_MSDOSDATE:
 	case FILE_BEMSDOSDATE:
@@ -957,8 +992,11 @@ apprentice_magic_strength(const struct magic *m)
 	case FILE_BEMSDOSTIME:
 	case FILE_LEMSDOSTIME:
 		ts = typesize(m->type);
-		if (ts == FILE_BADSIZE)
+		if (ts == FILE_BADSIZE) {
+			(void)fprintf(stderr, "Bad size for type %d\n",
+			    m->type);
 			abort();
+		}
 		val += ts * MULT;
 		break;
 
@@ -986,6 +1024,7 @@ apprentice_magic_strength(const struct magic *m)
 	case FILE_INDIRECT:
 	case FILE_NAME:
 	case FILE_USE:
+	case FILE_CLEAR:
 		break;
 
 	case FILE_DER:
@@ -1022,6 +1061,33 @@ apprentice_magic_strength(const struct magic *m)
 		abort();
 	}
 
+	return val;
+}
+
+
+private size_t
+apprentice_magic_strength(const struct magic *m,
+    size_t nmagic __attribute__((__unused__)))
+{
+	ssize_t val = apprentice_magic_strength_1(m);
+
+#ifdef notyet
+	if (m->desc[0] == '\0') {
+		size_t i;
+		/*
+		 * Magic entries with no description get their continuations
+		 * added
+		 */
+		for (i = 1; m[i].cont_level != 0 && i < MIN(nmagic, 3); i++) {
+			ssize_t v = apprentice_magic_strength_1(&m[i]) >>
+			    (i + 1);
+			val += v;
+			if (m[i].desc[0] != '\0')
+				break;
+		}
+	}
+#endif
+
 	switch (m->factor_op) {
 	case FILE_FACTOR_OP_NONE:
 		break;
@@ -1038,18 +1104,22 @@ apprentice_magic_strength(const struct magic *m)
 		val /= m->factor;
 		break;
 	default:
+		(void)fprintf(stderr, "Bad factor_op %u\n", m->factor_op);
 		abort();
 	}
 
 	if (val <= 0)	/* ensure we only return 0 for FILE_DEFAULT */
 		val = 1;
 
+#ifndef notyet
 	/*
 	 * Magic entries with no description get a bonus because they depend
 	 * on subsequent magic entries to print something.
 	 */
 	if (m->desc[0] == '\0')
 		val++;
+#endif
+
 	return val;
 }
 
@@ -1061,8 +1131,8 @@ apprentice_sort(const void *a, const void *b)
 {
 	const struct magic_entry *ma = CAST(const struct magic_entry *, a);
 	const struct magic_entry *mb = CAST(const struct magic_entry *, b);
-	size_t sa = apprentice_magic_strength(ma->mp);
-	size_t sb = apprentice_magic_strength(mb->mp);
+	size_t sa = apprentice_magic_strength(ma->mp, ma->cont_count);
+	size_t sb = apprentice_magic_strength(mb->mp, mb->cont_count);
 	if (sa == sb)
 		return 0;
 	else if (sa > sb)
@@ -1077,7 +1147,7 @@ apprentice_sort(const void *a, const void *b)
 private void
 apprentice_list(struct mlist *mlist, int mode)
 {
-	uint32_t magindex = 0;
+	uint32_t magindex, descindex, mimeindex, lineindex;
 	struct mlist *ml;
 	for (ml = mlist->next; ml != mlist; ml = ml->next) {
 		for (magindex = 0; magindex < ml->nmagic; magindex++) {
@@ -1094,17 +1164,22 @@ apprentice_list(struct mlist *mlist, int mode)
 			 * Try to iterate over the tree until we find item with
 			 * description/mimetype.
 			 */
-			while (magindex + 1 < ml->nmagic &&
-			       ml->magic[magindex + 1].cont_level != 0 &&
-			       *ml->magic[magindex].desc == '\0' &&
-			       *ml->magic[magindex].mimetype == '\0')
-				magindex++;
+			lineindex = descindex = mimeindex = magindex;
+			for (magindex++; magindex < ml->nmagic &&
+			   ml->magic[magindex].cont_level != 0; magindex++) {
+				if (*ml->magic[descindex].desc == '\0'
+				    && *ml->magic[magindex].desc)
+					descindex = magindex;
+				if (*ml->magic[mimeindex].mimetype == '\0'
+				    && *ml->magic[magindex].mimetype)
+					mimeindex = magindex;
+			}
 
 			printf("Strength = %3" SIZE_T_FORMAT "u@%u: %s [%s]\n",
-			    apprentice_magic_strength(m),
-			    ml->magic[magindex].lineno,
-			    ml->magic[magindex].desc,
-			    ml->magic[magindex].mimetype);
+			    apprentice_magic_strength(m, ml->nmagic - magindex),
+			    ml->magic[lineindex].lineno,
+			    ml->magic[descindex].desc,
+			    ml->magic[mimeindex].mimetype);
 		}
 	}
 }
@@ -2528,6 +2603,7 @@ check_format_type(const char *ptr, int type, const char **estr)
 				h = 0;
 				break;
 			default:
+				fprintf(stderr, "Bad number format %d", type);
 				abort();
 			}
 		} else
@@ -2670,6 +2746,7 @@ check_format_type(const char *ptr, int type, const char **estr)
 
 	default:
 		/* internal error */
+		fprintf(stderr, "Bad file format %d", type);
 		abort();
 	}
 invalid:
@@ -2764,12 +2841,11 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 		}
 		if (m->type == FILE_REGEX) {
 			file_regex_t rx;
-			int rc = file_regcomp(&rx, m->value.s, REG_EXTENDED);
-			if (rc) {
-				if (ms->flags & MAGIC_CHECK)
-					file_regerror(&rx, rc, ms);
+			int rc = file_regcomp(ms, &rx, m->value.s,
+			    REG_EXTENDED);
+			if (rc == 0) {
+				file_regfree(&rx);
 			}
-			file_regfree(&rx);
 			return rc ? -1 : 0;
 		}
 		return 0;
@@ -2839,6 +2915,7 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 				x = 0;
 				break;
 			default:
+				fprintf(stderr, "Bad width %zu", ts);
 				abort();
 			}
 			if (x) {
@@ -2871,6 +2948,7 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
 	char	*pmax = p + plen - 1;
 	int	c;
 	int	val;
+	size_t	bracket_nesting = 0;
 
 	while ((c = *s++) != '\0') {
 		if (isspace(CAST(unsigned char, c)))
@@ -2879,135 +2957,149 @@ getstr(struct magic_set *ms, struct magic *m, const char *s, int warn)
 			file_error(ms, 0, "string too long: `%s'", origs);
 			return NULL;
 		}
-		if (c == '\\') {
-			switch(c = *s++) {
+		if (c != '\\') {
+		    if (c == '[') {
+			    bracket_nesting++;
+		    }
+		    if (c == ']' && bracket_nesting > 0) {
+			    bracket_nesting--;
+		    }
+		    *p++ = CAST(char, c);
+		    continue;
+		}
+		switch(c = *s++) {
 
-			case '\0':
-				if (warn)
-					file_magwarn(ms, "incomplete escape");
-				s--;
-				goto out;
-
-			case '\t':
-				if (warn) {
-					file_magwarn(ms,
-					    "escaped tab found, use \\t instead");
-					warn = 0;	/* already did */
-				}
-				/*FALLTHROUGH*/
-			default:
-				if (warn) {
-					if (isprint(CAST(unsigned char, c))) {
-						/* Allow escaping of
-						 * ``relations'' */
-						if (strchr("<>&^=!", c) == NULL
-						    && (m->type != FILE_REGEX ||
-						    strchr("[]().*?^$|{}", c)
-						    == NULL)) {
-							file_magwarn(ms, "no "
-							    "need to escape "
-							    "`%c'", c);
-						}
-					} else {
-						file_magwarn(ms,
-						    "unknown escape sequence: "
-						    "\\%03o", c);
+		case '\0':
+			if (warn)
+				file_magwarn(ms, "incomplete escape");
+			s--;
+			goto out;
+		case '.':
+			if (m->type == FILE_REGEX &&
+			    bracket_nesting == 0 && warn) {
+				file_magwarn(ms, "escaped dot ('.') found, "
+				    "use \\\\. instead");
+			}
+			warn = 0; /* already did */
+			/*FALLTHROUGH*/
+		case '\t':
+			if (warn) {
+				file_magwarn(ms,
+				    "escaped tab found, use \\\\t instead");
+				warn = 0;	/* already did */
+			}
+			/*FALLTHROUGH*/
+		default:
+			if (warn) {
+				if (isprint(CAST(unsigned char, c))) {
+					/* Allow escaping of
+					 * ``relations'' */
+					if (strchr("<>&^=!", c) == NULL
+					    && (m->type != FILE_REGEX ||
+					    strchr("[]().*?^$|{}", c)
+					    == NULL)) {
+						file_magwarn(ms, "no "
+						    "need to escape "
+						    "`%c'", c);
 					}
+				} else {
+					file_magwarn(ms,
+					    "unknown escape sequence: "
+					    "\\%03o", c);
 				}
-				/*FALLTHROUGH*/
-			/* space, perhaps force people to use \040? */
-			case ' ':
+			}
+			/*FALLTHROUGH*/
+		/* space, perhaps force people to use \040? */
+		case ' ':
 #if 0
-			/*
-			 * Other things people escape, but shouldn't need to,
-			 * so we disallow them
-			 */
-			case '\'':
-			case '"':
-			case '?':
+		/*
+		 * Other things people escape, but shouldn't need to,
+		 * so we disallow them
+		 */
+		case '\'':
+		case '"':
+		case '?':
 #endif
-			/* Relations */
-			case '>':
-			case '<':
-			case '&':
-			case '^':
-			case '=':
-			case '!':
-			/* and baskslash itself */
-			case '\\':
-				*p++ = CAST(char, c);
-				break;
+		/* Relations */
+		case '>':
+		case '<':
+		case '&':
+		case '^':
+		case '=':
+		case '!':
+		/* and backslash itself */
+		case '\\':
+			*p++ = CAST(char, c);
+			break;
 
-			case 'a':
-				*p++ = '\a';
-				break;
+		case 'a':
+			*p++ = '\a';
+			break;
 
-			case 'b':
-				*p++ = '\b';
-				break;
+		case 'b':
+			*p++ = '\b';
+			break;
 
-			case 'f':
-				*p++ = '\f';
-				break;
+		case 'f':
+			*p++ = '\f';
+			break;
 
-			case 'n':
-				*p++ = '\n';
-				break;
+		case 'n':
+			*p++ = '\n';
+			break;
 
-			case 'r':
-				*p++ = '\r';
-				break;
+		case 'r':
+			*p++ = '\r';
+			break;
 
-			case 't':
-				*p++ = '\t';
-				break;
+		case 't':
+			*p++ = '\t';
+			break;
 
-			case 'v':
-				*p++ = '\v';
-				break;
+		case 'v':
+			*p++ = '\v';
+			break;
 
-			/* \ and up to 3 octal digits */
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-				val = c - '0';
-				c = *s++;  /* try for 2 */
-				if (c >= '0' && c <= '7') {
-					val = (val << 3) | (c - '0');
-					c = *s++;  /* try for 3 */
-					if (c >= '0' && c <= '7')
-						val = (val << 3) | (c-'0');
-					else
-						--s;
-				}
+		/* \ and up to 3 octal digits */
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+			val = c - '0';
+			c = *s++;  /* try for 2 */
+			if (c >= '0' && c <= '7') {
+				val = (val << 3) | (c - '0');
+				c = *s++;  /* try for 3 */
+				if (c >= '0' && c <= '7')
+					val = (val << 3) | (c-'0');
 				else
 					--s;
-				*p++ = CAST(char, val);
-				break;
-
-			/* \x and up to 2 hex digits */
-			case 'x':
-				val = 'x';	/* Default if no digits */
-				c = hextoint(*s++);	/* Get next char */
-				if (c >= 0) {
-					val = c;
-					c = hextoint(*s++);
-					if (c >= 0)
-						val = (val << 4) + c;
-					else
-						--s;
-				} else
-					--s;
-				*p++ = CAST(char, val);
-				break;
 			}
-		} else
-			*p++ = CAST(char, c);
+			else
+				--s;
+			*p++ = CAST(char, val);
+			break;
+
+		/* \x and up to 2 hex digits */
+		case 'x':
+			val = 'x';	/* Default if no digits */
+			c = hextoint(*s++);	/* Get next char */
+			if (c >= 0) {
+				val = c;
+				c = hextoint(*s++);
+				if (c >= 0)
+					val = (val << 4) + c;
+				else
+					--s;
+			} else
+				--s;
+			*p++ = CAST(char, val);
+			break;
+		}
 	}
 	--s;
 out:
@@ -3593,13 +3685,13 @@ file_magicfind(struct magic_set *ms, const char *name, struct mlist *v)
 
 	for (ml = mlist->next; ml != mlist; ml = ml->next) {
 		struct magic *ma = ml->magic;
-		uint32_t nma = ml->nmagic;
-		for (i = 0; i < nma; i++) {
+		for (i = 0; i < ml->nmagic; i++) {
 			if (ma[i].type != FILE_NAME)
 				continue;
 			if (strcmp(ma[i].value.s, name) == 0) {
 				v->magic = &ma[i];
-				for (j = i + 1; j < nma; j++)
+				v->magic_rxcomp = &(ml->magic_rxcomp[i]);
+				for (j = i + 1; j < ml->nmagic; j++)
 				    if (ma[j].cont_level == 0)
 					    break;
 				v->nmagic = j - i;
