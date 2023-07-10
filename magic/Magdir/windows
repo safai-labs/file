@@ -20,7 +20,7 @@
 # URL:		http://fileformats.archiveteam.org/wiki/Outlook_Express_Database
 # Reference:	http://mark0.net/download/triddefs_xml.7z/defs/d/dbx.trid.xml
 #		https://sourceforge.net/projects/ol2mbox/files/LibDBX/
-#		v1.0.4/libdbx_1.0.4.tar.gz/FILE-FORMAT 
+#		v1.0.4/libdbx_1.0.4.tar.gz/FILE-FORMAT
 # Note:		called "Outlook Express Database" by TrID and DROID via PUID fmt/838 fmt/839
 #		and partly verified by `undbx --verbosity 4 Posteingang.dbx`
 0	string	\xCF\xAD\x12\xFE
@@ -71,7 +71,7 @@
 !:ext	nk2/dat/bak
 # nick is used by "older" Outlook; dat is used by "newer" Outlook (probably 2010 - 2016); bak is used for backup
 #!:ext	nick/nk2/dat/bak
-# Unknown; probably a version indicator like: 0000000Ah 0000000Ch 
+# Unknown; probably a version indicator like: 0000000Ah 0000000Ch
 >4	ulelong		x		\b, probably version %u
 # Unknown2; probably a version indicator like: 1 0
 >8	ulelong		x		\b.%u
@@ -122,7 +122,7 @@
 #>>20	ulelong		x		\b, PfnDatabase %#x
 # PsLoadedModuleList like: 8055d720
 #>>24	ulelong		x		\b, PsLoadedModuleList %#x
-# PsActiveProcessHead like:805638b8 
+# PsActiveProcessHead like:805638b8
 #>>28	ulelong		x		\b, PsActiveProcessHead %#x
 # MachineImageType like: 14c (intel x86)
 >>32	ulelong		!0x14c		\b, MachineImageType %#x
@@ -259,9 +259,9 @@
 #!:mime		application/octet-stream
 !:mime		application/x-ms-evtx
 !:ext		evtx
-# Major+Minor format version: 3.1~Vista and later 3.2~Windows 10 (2004) and later 
+# Major+Minor format version: 3.1~Vista and later 3.2~Windows 10 (2004) and later
 >0x24	ulelong		=0x00030001	Vista-8.1 Event Log
->0x24	ulelong		!0x00030001	10-11 Event Log, version 
+>0x24	ulelong		!0x00030001	10-11 Event Log, version
 >>0x26	uleshort	x		%u
 >>0x24	uleshort	x		\b.%u
 >0x2a	leshort		x		\b, %d chunks
@@ -293,7 +293,7 @@
 !:mime		application/etl
 !:ext		etl
 # look for DOS drive letter part of log file name like: PhotosAppTracing_startedInBGMode.etl
->0	search/0x2b4/sb	:\0\x5c\0	
+>0	search/0x2b4/sb	:\0\x5c\0
 # like: "c:\Windows\Logs\NetSetup\service.0.etl" "C:\Windows\System32\LogFiles\WMI\Wifi.etl"
 >>&-2	lestring16		x		"%s"
 
@@ -346,7 +346,7 @@
 # Offset
 >>>0x410	ulequad		x		at %#llx
 # print 1 space after size and then handles NTFS boot sector by ./filesystems
->>>0x418	ulequad		>0		%llu bytes 
+>>>0x418	ulequad		>0		%llu bytes
 >>>>(0x410.l)	indirect	x
 # 2nd BLOB: WIM
 >>0x440		string		>\0		\b, type %-3.8s
@@ -355,7 +355,7 @@
 >>>0x448	ulequad		!0		%#llx attributes
 # Offset
 >>>0x450	ulequad		x		at %#llx
->>>0x458	ulequad		>0		%llu bytes 
+>>>0x458	ulequad		>0		%llu bytes
 >>>>(0x450.l)	indirect	x
 # 3rd BLOB
 >>0x480		string		>\0		\b, type %-3.8s
@@ -406,27 +406,27 @@
 # size of entry, in bytes: 40h(init) 78h(launced) 9Ch
 #>0x18		ulelong		x		\b; entry size %u
 >0x18		ulelong		x		\b; entry size %#x
-# time stamp, in seconds 
+# time stamp, in seconds
 >0x00		ulelong		x		\b, %#x seconds
 # always zero, significance unknown
 >0x04		ulelong		!0		\b, not null %u
-# GUID of event source; but empty if event source is BOOTMGR 
+# GUID of event source; but empty if event source is BOOTMGR
 >0x08		ubequad		!0		\b, GUID %#16.16llx
 >>0x10		ubequad		x		\b%16.16llx
 # severity code: 1~informational 3~errors
 >0x1C		ulelong		!1		\b, severity %#x
-# apparently a version number: 2 
+# apparently a version number: 2
 >0x20		ulelong		!2		\b, version %u
-# event identifier 1~log file initialised 11h~boot application launched 
+# event identifier 1~log file initialised 11h~boot application launched
 #>0x24		ulelong		x		\b, event %#x
 >0x24		ulelong		!1
 >>0x24		ulelong		!0x11		\b, event %#x
-# entry data; size depends on event identifier  
+# entry data; size depends on event identifier
 #>0x28		ubequad		x		\b, data %#16.16llx
 >0x24		ulelong		=0x1		\b, Init
-# always 0, significance unknown 
+# always 0, significance unknown
 >>0x34		uleshort	!0		\b, not null %u
-# always 7, significance unknown 
+# always 7, significance unknown
 >>0x36		uleshort	!7		\b, not seven %u
 # year
 >>0x28		uleshort	x		%u
@@ -454,11 +454,11 @@
 # Created by:	Joerg Jenderek
 # Note:		in directories	%ProgramData%\Microsoft\Windows\WER\{ReportArchive,ReportQueue}
 #				%LOCALAPPDATA%\Microsoft\Windows\WER\{ReportArchive,ReportQueue}
-0	lestring16	Version=	
+0	lestring16	Version=
 >22	lestring16	EventType	Windows Error Report
 !:mime	text/plain
 # Report.wer
-!:ext	wer
+!:ext	wer/txt/err
 
 # Summary: Windows 3.1 group files
 # Extension: .grp
@@ -602,7 +602,7 @@
 >>1	regex/c		\^([^\xd>]*|.*\\.hlp)	MS Windows help file Content, based "%s"
 !:mime	text/plain
 !:apple	????TEXT
-!:ext	cnt
+!:ext	cnt/txt
 #
 # Windows creates a full text search from hlp file, if the user clicks the "Find" tab and enables keyword indexing
 0	string		tfMR			MS Windows help Full Text Search index
@@ -802,7 +802,7 @@
 # if no LINKTARGET_IDLIST (no HasLinkTargetIDList) then direct after header; no example found
 >>20	lelong&1	=0
 >>>76	use			lnk-info
-# if LINKTARGET_IDLIST (HasLinkTargetIDList) then after LINKTARGET_IDLIST by addtional IDListSize bytes 
+# if LINKTARGET_IDLIST (HasLinkTargetIDList) then after LINKTARGET_IDLIST by addtional IDListSize bytes
 >>20	lelong&1	=1
 >>>76	uleshort	>0
 #>>>>(76.s+78)	use		lnk-info
@@ -835,7 +835,7 @@
 >0	ulelong		x	\b, LinkInfoSize %#x
 # LinkInfoHeaderSize; if 1C no optional fields; >=24 optional fields are specified
 >4	ulelong		x	\b, LinkInfoHeaderSize %#x
-# LinkInfoFlags; 
+# LinkInfoFlags;
 #>8	ulelong	 	x	\b, LinkInfoFlags=%#x
 >8	ulelong&1 	1	\b, VolumeIDAndLocalBasePath
 # VolumeIDOffset; location of the VolumeID field (VolumeIDSize DriveType DriveSerialNumber VolumeLabelOffset ... ) inside LinkInfo structure
@@ -980,13 +980,13 @@
 !:ext	reg
 #		Windows 9X variant
 >>0	string		REGEDIT4		(Win95 or above)
-#		Windows 2K ANSI variant
-0	string		Windows\ Registry\ Editor\ 
+#		Windows 2K ANSI variant (Note we need a whitespace after\ )
+0	string		Windows\ Registry\ Editor\ # keep this here
 >&0	string		Version\ 5.00\r\n\r\n	Windows Registry text (Win2K or above)
 !:mime	text/x-ms-regedit
 !:ext	reg
-#		Windows 2K UTF-16 variant
-2	lestring16	Windows\ Registry\ Editor\ 
+#		Windows 2K UTF-16 variant (Note we need a whitespace after\ )
+2	lestring16	Windows\ Registry\ Editor\ # keep this here
 >0x32	lestring16	Version\ 5.00\r\n\r\n	Windows Registry little-endian text (Win2K or above)
 # relative offset not working
 #>&0	lestring16	Version\ 5.00\r\n\r\n	Windows Registry little-endian text (Win2K or above)
@@ -1106,7 +1106,7 @@
 >>&0	regex/c		\^Windows\ (Latin|Cyrillic)			Windows codepage translator
 #!:mime	text/plain
 !:mime	text/x-ms-cpx
-# like: 12510866.CPX 
+# like: 12510866.CPX
 !:ext	cpx
 # From:		Joerg Jenderek
 # URL:		https://en.wikipedia.org/wiki/File_Explorer
@@ -1186,7 +1186,7 @@
 # characters, digits, underscore and white space followed by right bracket
 # terminated by CR implies section line to skip BOOTLOG.TXT DETLOG.TXT
 >>>>>>&-1	regex/T			\^([A-Za-z0-9_\(\)\ ]+)\]\r	Generic INItialization configuration [%-.40s
-# NETDEF.INF multiarc.ini 
+# NETDEF.INF multiarc.ini
 #!:mime	application/x-setupscript
 !:mime	application/x-wine-extension-ini
 #!:mime	text/plain
@@ -1267,11 +1267,11 @@
 # URL:		http://fileformats.archiveteam.org/wiki/INF_(Windows)
 # Reference:	http://en.verysource.com/code/10350344_1/inf.h.html
 # Note:		stored in %Windir%\Inf %Windir%\System32\DriverStore\FileRepository
-# check for valid major and minor versions: 101h - 303h 
+# check for valid major and minor versions: 101h - 303h
 0		leshort&0xFcFc	=0x0000
 # GRR: line above (strength 50) is too general as it catches also "PDP-11 UNIX/RT ldp" ./pdp
 >0		leshort&0x0303	!0x0000
-# test for valid InfStyles: 1 2 
+# test for valid InfStyles: 1 2
 >>2		uleshort	>0
 >>>2		uleshort	<3
 # look for colon in WinDirPath after PNF header
@@ -1559,10 +1559,10 @@
 # hostname
 >>0x1db	lestring16	x				\b, %-.9s
 # utf string variant with prepending fe??ffFFff
->>0x1db	search/43	\xFF\xFF\xFF			
+>>0x1db	search/43	\xFF\xFF\xFF
 # user name
 >>>&0	lestring16	x				\b\%-.9s
->>>&0	search/43	\xFF\xFF\xFF			
+>>>&0	search/43	\xFF\xFF\xFF
 # directory like C:\Program Files\GIMP 2
 >>>>&0	lestring16	x				\b, %-.42s
 
@@ -1659,7 +1659,7 @@
 #define FLAG_HEADER_COMPRESS_XPRESS     0x00020000
 #define FLAG_HEADER_COMPRESS_LZX	0x00040000
 #define FLAG_HEADER_COMPRESS_LZMS	0x00080000
-#define FLAG_HEADER_COMPRESS_XPRESS2    0x00100000 wimlib-1.13.0\include\wimlib\header.h 
+#define FLAG_HEADER_COMPRESS_XPRESS2    0x00100000 wimlib-1.13.0\include\wimlib\header.h
 # XPRESS, with small chunk size
 >16	ulelong		&0x00100000		\b, XPRESS2
 >16	ulelong		&0x00080000		\b, LZMS
@@ -1702,7 +1702,7 @@
 !:ext		mig
 >0x18		string		=MRTS	without password
 # data offset with 1 space at end
->>0x1c		ulelong+0x38	x	\b, at %#x 
+>>0x1c		ulelong+0x38	x	\b, at %#x
 # look for zlib compressed data by ./compress
 >>(0x1c.l+0x38)	ubyte		x
 >>>&-1	indirect	x
@@ -1732,7 +1732,7 @@
 #!:mime		application/octet-stream
 # https://www.thoughtco.com/mime-types-by-content-type-3469108
 # https://filext.com/file-extension/PAM
-!:mime		application/x-perfmon 
+!:mime		application/x-perfmon
 #!:mime		application/x-ms-pma
 !:ext		pma
 # metric type like: "BrowserMetrics" "CrashpadMetrics" "SetupMetrics"
@@ -1741,7 +1741,7 @@
 # From:		Joerg Jenderek
 # URL:		https://en.wikipedia.org/wiki/InstallShield
 # Reference:	http://mark0.net/download/triddefs_xml.7z/defs/i/ins.trid.xml
-# Note:		contain also keywords like: BATCH_INSTALL ISVERSION LOGHANDLE SRCDIR SRCDISK WINDIR WINSYSDISK 
+# Note:		contain also keywords like: BATCH_INSTALL ISVERSION LOGHANDLE SRCDIR SRCDISK WINDIR WINSYSDISK
 0	ubelong	0xB8C90C00	InstallShield Script
 #!:mime	application/octet-stream
 !:mime	application/x-installshield-ins

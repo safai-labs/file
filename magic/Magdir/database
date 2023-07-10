@@ -183,9 +183,9 @@
 >>>>>>>>>>>>0	use			xbase-type
 # database file
 >>>>>>>>>>>>28	ubyte&0x04		=0		\b DBF
-!:ext	dbf
+!:ext	dbf/dbase3/dbase4/dbase5
 >>>>>>>>>>>>28	ubyte&0x04		=4		\b DataBaseContainer
-!:ext	dbc
+!:ext	dbc/dbase3/dbase4/dbase5
 >>>>>>>>>>>>4	lelong			0		\b, no records
 >>>>>>>>>>>>4	lelong			>0		\b, %d record
 # plural s appended
@@ -260,7 +260,7 @@
 >>0	ubyte		0x05		dBase V
 !:mime	application/x-dbf
 # like: dbase4double.dbf Quattro-test2.dbf umlaut-test7.dbf
-!:ext	dbf
+!:ext	dbf/dbase/dbase3/dbase4/dbase5
 # probably Apollo Database Server 9.7? xBase (0x6)
 >>0	ubyte		0x06		Apollo
 !:mime	application/x-dbf
@@ -275,7 +275,7 @@
 # Microsoft Visual FoxPro Database Container File like: FOXPRO-DB-TEST.DBC TESTDATA.DBC TASTRADE.DBC
 >>0	ubyte		0x31		Visual FoxPro, autoincrement
 !:mime	application/x-dbf
-# like: AI_Table.DBF dbase_31.dbf w_cityFoxpro.dbf 
+# like: AI_Table.DBF dbase_31.dbf w_cityFoxpro.dbf
 # Visual FoxPro, with field type Varchar or Varbinary
 >>0	ubyte		0x32		Visual FoxPro, with field type Varchar
 !:mime	application/x-dbf
@@ -427,7 +427,7 @@
 # skip few (14/758) Microsoft Event Trace Logs (boot_BASE+CSWITCH_1.etl DlTel-Merge.etl UpdateUx.006.etl) with invalid "high" 1st item \377\377
 >>>>>>>>>>>>512	ubyte		<0377
 # skip some Commodore 64 Art Studio (Deep_Strike.aas dragon's_lair_ii.aas), some Atari DEGAS Elite bitmap (ELEPHANT.PC3 ST.PC2)
-# some probably old GRUB modules (part_sun.mod) and virtual-boy-wario-land.vb. 
+# some probably old GRUB modules (part_sun.mod) and virtual-boy-wario-land.vb.
 # by looking for valid terminating character Ctrl-Z
 >>>>>>>>>>>>>513 search/523	\032
 # Atari DEGAS bitmap ST.PC2 with 0370 as second terminating character
@@ -588,7 +588,7 @@
 >14	ubyte		^0x40			index
 # only 1 example like: TEST.IDX
 !:ext	idx
-# pointer to root node like: 1C00h 800h often 400h 
+# pointer to root node like: 1C00h 800h often 400h
 >0	ulelong		!0x400			\b, root pointer %#x
 # Pointer to free node list: often 0 but -1 if not present
 >4	ulelong		!0			\b, free node pointer %#x
@@ -635,7 +635,7 @@
 
 # Summary:	dBASE IV Printer Form *.PRF
 # From:		Joerg Jenderek
-# URL:		https://en.wikipedia.org/wiki/.dbf#Other_file_types_found_in_dBASE	
+# URL:		https://en.wikipedia.org/wiki/.dbf#Other_file_types_found_in_dBASE
 # Reference:	https://mark0.net/download/triddefs_xml.7z/defs/p/prf-dbase.trid.xml
 0	ubeshort	0x0400
 # skip some Xbase Index files *.ndx and Infocom (Z-machine 4) *.z4 handled by ./adventure

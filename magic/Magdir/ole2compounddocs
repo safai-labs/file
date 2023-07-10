@@ -59,7 +59,7 @@
 #>>>0x1E	uleshort		9			\b, blocksize 512
 >>>0x1E	uleshort		9
 # jump to one block (512 bytes per block) before root storage block
-# in 5.37 only true for offset ~< FILE_BYTES_MAX=7 MiB defined in ../../src/file.h 
+# in 5.37 only true for offset ~< FILE_BYTES_MAX=7 MiB defined in ../../src/file.h
 >>>>(48.l*512)	ubyte		x
 >>>>>&511 	use		ole2-directory
 # check directory entry structure and display types by GUID
@@ -73,7 +73,7 @@
 # the DirIDs of the child nodes. Should both be -1 in the root storage entry
 #>68 	bequad		!0xffffffffffffffff	\b, DirIDs %llx
 # NEXT lines for DEBUGGING
-# second directory entry name like VisioDocument Control000 
+# second directory entry name like VisioDocument Control000
 #>128	lestring16	x \b, 2nd %.20s
 # third directory entry like WordDocument
 #>256	lestring16	x \b, 3rd %.20s
@@ -100,7 +100,7 @@
 # URL:	https://en.wikipedia.org/wiki/MicroStation
 #   Last update on 10/23/2006 by Lester Hightower
 #   07/24/2019 by Joerg Jenderek
-# Second directory entry name like Dgn~H Dgn~S 
+# Second directory entry name like Dgn~H Dgn~S
 >>>>128 	lestring16	Dgn~			: Microstation V8 CAD
 #!:mime	application/x-ole-storage
 !:mime	application/x-bentley-dgn
@@ -137,7 +137,7 @@
 !:mime	application/vnd.ms-excel
 # https://www.macdisk.com/macsigen.php	XLS5 for Excel 5
 !:apple	????XLS9
-!:ext	xls
+!:ext	xls/xlt/xla
 #
 # URL:	http://fileformats.archiveteam.org/wiki/PPT
 # Second directory entry name Object1 Object12 Object35
@@ -171,7 +171,7 @@
 !:ext	rra
 #
 # URL:	https://www.forensicswiki.org/wiki/Jump_Lists
-# 3rd directory entry name DestList	
+# 3rd directory entry name DestList
 >>>>256 	lestring16	DestList		: Windows jump list
 #!:mime	application/x-ole-storage
 !:mime	application/x-ms-jumplist
@@ -282,7 +282,7 @@
 # second directory entry name Current User
 >>>>128 	lestring16	Current\ User		: SoftMaker
 # third directory entry name SMNativeObjData
->>>>>256	lestring16	SMNativeObjData		
+>>>>>256	lestring16	SMNativeObjData
 # 5th directory entry name PowerPoint
 >>>>>>512	lestring16	PowerPoint		PowerPoint presentation or template
 !:mime	application/vnd.ms-powerpoint
@@ -355,7 +355,7 @@
 >>88 	ubequad		0xc000000000000046
 >>>80 	ubequad		0x131a020000000000	: Microsoft Visio 2000-2002 Document, stencil or template
 !:mime	application/vnd.visio
-# VSD~Drawing VSS~Stencil VST~Template 
+# VSD~Drawing VSS~Stencil VST~Template
 !:ext	vsd/vss/vst
 >>>80 	ubequad		0x141a020000000000	: Microsoft Visio 2003-2010 Document, stencil or template
 !:mime	application/vnd.visio
@@ -419,21 +419,22 @@
 # https://www.macdisk.com/macsigen.php
 !:apple	????XLS5
 # worksheet/addin/template/no extension on Macintosh
-!:ext	xls/xla/xlt/
+!:ext	xls/xla/xlt
 #
 >>>80 	ubequad		0x2008020000000000	: Microsoft Excel 97-2003
 !:mime	application/vnd.ms-excel
 # https://www.macdisk.com/macsigen.php	XLS5 for Excel 5
 !:apple	????XLS9
+!:ext   xls
 # 3rd directory entry name
 >>>>256 	lestring16	_VBA_PROJECT_CUR	addin
-!:ext	xla/
+!:ext	xla/xls/xlt
 # 4th directory entry name
 >>>>384 	lestring16	_VBA_PROJECT_CUR	addin
-!:ext	xla
+!:ext	xla/xls/xlt
 #!:ext	xla/
 >>>>256 	default		x			worksheet or template
-!:ext	xls/xlt
+!:ext	xls/xlt/xla
 #!:ext	xls/xlt/
 #
 # URL:	http://fileformats.archiveteam.org/wiki/OLE2
@@ -585,8 +586,8 @@
 !:ext	wpd
 #>>>>0	search/0xc01/s	\xffWPC			\b, WPC SIGNATURE
 # inspect embedded WordPerfect document by ./wordprocessors with 1 space at end
-#>>>>>&0	indirect	x	\b; contains 
-# GRR: the above expression does not work correctly 
+#>>>>>&0	indirect	x	\b; contains
+# GRR: the above expression does not work correctly
 #
 # URL:	http://fileformats.archiveteam.org/wiki/SHW_(Corel)
 #???
@@ -616,7 +617,7 @@
 >>>80 	ubequad		0x20f414de1cacce11	\bCAD Drawing or Template
 #!:mime	application/x-ole-storage
 !:mime	application/x-corel-cad
-# CCT for CorelCAD Template 
+# CCT for CorelCAD Template
 !:ext	ccd/cct
 #
 # URL:	http://fileformats.archiveteam.org/wiki/StarOffice_binary_formats
@@ -727,7 +728,7 @@
 >>>80 	ubequad		0x7b8cdd1cc081a045	3ds Max
 #!:mime	application/x-ole-storage
 !:mime	model/x-autodesk-max
-# like: https://static.free3d.com/models/dropbox/dropbox/sq/A380.7z/A380.max 
+# like: https://static.free3d.com/models/dropbox/dropbox/sq/A380.7z/A380.max
 !:ext	max
 # also chr for character file according to DROID https://www.nationalarchives.gov.uk/PRONOM/fmt/978
 #!:ext	max/chr

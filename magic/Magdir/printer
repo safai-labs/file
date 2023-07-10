@@ -7,8 +7,10 @@
 # PostScript, updated by Daniel Quinlan (quinlan@yggdrasil.com)
 0	string		%!		PostScript document text
 !:mime	application/postscript
+!:ext ps/eps/ai
 !:apple	ASPSTEXT
 >2	string		PS-Adobe-	conforming
+!:ext ai
 >>11	string		>\0		DSC level %.3s
 >>>15	string		EPS		\b, type %s
 >>>15	string		Query		\b, type %s
@@ -33,7 +35,7 @@
 # Update:	Joerg Jenderek
 # URL:		http://fileformats.archiveteam.org/wiki/Encapsulated_PostScript
 # Reference:	http://mark0.net/download/triddefs_xml.7z/defs/eps-adobe.trid.xml
-# Note:		called "Encapsulated PostScript binary" by TrID and 
+# Note:		called "Encapsulated PostScript binary" by TrID and
 #		verified partly by ImageMagick `identify -verbose *` as EPT (Encapsulated PostScript with TIFF preview)
 0       belong          0xC5D0D3C6
 # skip DROID fmt-122-signature-id-174.eps fmt-123-signature-id-178.eps fmt-124-signature-id-180.eps
@@ -41,11 +43,12 @@
 # GRR: in version 5.44 unequal and not endian variant not working!
 >32	ulelong		>0		DOS EPS Binary File
 !:mime	image/x-eps
+!:ext eps/ai
 # TODO: check that "long" is false on big endian machines
-# Postscript often (850/857) comes after header; so values like: 30 32 or 2788 10644 43350 71828  
+# Postscript often (850/857) comes after header; so values like: 30 32 or 2788 10644 43350 71828
 >>4      long            >0              at byte %d
 # 1 space char after length value to get phrase like "length 263893 PostScript document text"
->>>8     long            >0              length %d 
+>>>8     long            >0              length %d
 # PostScript document text handled by ./printer
 >>>>(4.l)	indirect		x
 # Reference:	http://mark0.net/download/triddefs_xml.7z/defs/e/eps-wmf.trid.xml
@@ -197,16 +200,16 @@
 # Note:		called "Hewlett-Packard Graphics Language" by TrID and
 #		"Hewlett Packard Graphics Language" by DROID via PUID x-fmt/293 and
 #		HPGL by XnView command `nconvert -info *`
-# initialize, start a plotting job 
+# initialize, start a plotting job
 0	string	IN;
 >0		use		hpgl
 # fill.plt
 0	string	INPS
 >0		use		hpgl
-# http://ftp.funet.fi/index/graphics/packages/hpgl2ps/hpgl2ps.tar.Z/hpgl2ps/test1.hpgl 
+# http://ftp.funet.fi/index/graphics/packages/hpgl2ps/hpgl2ps.tar.Z/hpgl2ps/test1.hpgl
 0	string	DF;
 >0		use		hpgl
-# http://ftp.funet.fi/index/graphics/packages/hpgl2ps/hpgl2ps.tar.Z/hpgl2ps/test3.hpgl 
+# http://ftp.funet.fi/index/graphics/packages/hpgl2ps/hpgl2ps.tar.Z/hpgl2ps/test3.hpgl
 # Select Pen n
 0	string	SP
 >0		use		hpgl
