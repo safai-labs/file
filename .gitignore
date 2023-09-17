@@ -43,3 +43,4 @@ Makefile.in
 
 /tests/test
 dist
+doc/magic.5
