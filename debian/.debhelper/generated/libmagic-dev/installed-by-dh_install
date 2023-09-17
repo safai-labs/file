@@ -1,0 +1,5 @@
+debian/tmp/usr/include
+debian/tmp/usr/lib/x86_64-linux-gnu/libmagic.a
+debian/tmp/usr/lib/x86_64-linux-gnu/libmagic.so
+debian/tmp/usr/lib/x86_64-linux-gnu/pkgconfig/libmagic.pc
+debian/tmp/usr/share/man/man3

@@ -1,0 +1,3 @@
+shlibs:Depends=libc6 (>= 2.34), libmagic1 (>= 5.21)
+misc:Depends=
+misc:Pre-Depends=

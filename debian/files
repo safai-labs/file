@@ -1,0 +1,7 @@
+file-dbgsym_5.44-1resiliate0.1_amd64.ddeb debug optional automatic=yes
+file_5.44-1resiliate0.1_amd64.buildinfo utils standard
+file_5.44-1resiliate0.1_amd64.deb utils standard
+libmagic-dev_5.44-1resiliate0.1_amd64.deb libdevel optional
+libmagic-mgc_5.44-1resiliate0.1_amd64.deb libs optional
+libmagic1-dbgsym_5.44-1resiliate0.1_amd64.ddeb debug optional automatic=yes
+libmagic1_5.44-1resiliate0.1_amd64.deb libs optional

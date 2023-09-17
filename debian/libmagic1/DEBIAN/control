@@ -1,0 +1,16 @@
+Package: libmagic1
+Source: file
+Version: 1:5.44-1resiliate0.1
+Architecture: amd64
+Maintainer: saf.ai Resiliate Maintainers <support@saf.ai>
+Installed-Size: 16803
+Depends: libbz2-1.0, libc6 (>= 2.33), liblzma5 (>= 5.1.1alpha+20120614), libzstd1 (>= 1.4.0), zlib1g (>= 1:1.1.4), libmagic-mgc (= 1:5.44-1resiliate0.1)
+Suggests: file
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.darwinsys.com/file/
+Description: Recognize the type of data in a file using "magic" numbers - library
+ This library can be used to classify files according to magic number
+ tests. It implements the core functionality of the file command.
+Original-Maintainer: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>

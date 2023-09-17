@@ -1,0 +1,7 @@
+16a25b28d18c34be17d10938deaf1bec  usr/include/file/file.h
+2d20d263e3f49914152115685ba5715d  usr/include/magic.h
+138df92ad27b7f50d2a651c1feed7f17  usr/lib/x86_64-linux-gnu/libmagic.a
+f8ee0a8fbbe7e84f00df6a43fcc637eb  usr/lib/x86_64-linux-gnu/pkgconfig/libmagic.pc
+3ab5da4649436bbb06f63b9553cd903e  usr/share/doc/libmagic-dev/changelog.Debian.gz
+1f6d90802be7cec125a2f52df0dac367  usr/share/doc/libmagic-dev/copyright
+d0ce0c71f0655479eb5117aabf873496  usr/share/man/man3/libmagic.3.gz

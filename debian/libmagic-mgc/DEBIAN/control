@@ -1,0 +1,18 @@
+Package: libmagic-mgc
+Source: file
+Version: 1:5.44-1resiliate0.1
+Architecture: amd64
+Maintainer: saf.ai Resiliate Maintainers <support@saf.ai>
+Installed-Size: 8332
+Breaks: libmagic1 (<< 1:5.28-4~)
+Replaces: libmagic1 (<< 1:5.28-4~)
+Section: libs
+Priority: optional
+Multi-Arch: foreign
+Homepage: https://www.darwinsys.com/file/
+Description: File type determination library using "magic" numbers (compiled magic file)
+ This package provides the compiled magic file "magic.mgc". It has
+ been separated from libmagic1 in order to meet the multiarch
+ requirements without breaking applications that expect this file
+ at its absolute path.
+Original-Maintainer: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>

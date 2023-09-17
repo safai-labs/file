@@ -1,0 +1,15 @@
+Package: libmagic1-dbgsym
+Package-Type: ddeb
+Source: file
+Version: 1:5.44-1resiliate0.1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: saf.ai Resiliate Maintainers <support@saf.ai>
+Installed-Size: 255
+Depends: libmagic1 (= 1:5.44-1resiliate0.1)
+Section: debug
+Priority: optional
+Multi-Arch: same
+Description: debug symbols for libmagic1
+Build-Ids: 2744ad407a408c3312a279d9a93c773d0941cf52
+Original-Maintainer: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>

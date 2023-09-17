@@ -1,0 +1,14 @@
+Package: file-dbgsym
+Package-Type: ddeb
+Source: file
+Version: 1:5.44-1resiliate0.1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: saf.ai Resiliate Maintainers <support@saf.ai>
+Installed-Size: 37
+Depends: file (= 1:5.44-1resiliate0.1)
+Section: debug
+Priority: optional
+Description: debug symbols for file
+Build-Ids: 233b07c4559bba3ae79890a1d8968ecc79065bb6
+Original-Maintainer: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>

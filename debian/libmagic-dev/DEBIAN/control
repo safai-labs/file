@@ -1,0 +1,18 @@
+Package: libmagic-dev
+Source: file
+Version: 1:5.44-1resiliate0.1
+Architecture: amd64
+Maintainer: saf.ai Resiliate Maintainers <support@saf.ai>
+Installed-Size: 394
+Depends: libmagic1 (= 1:5.44-1resiliate0.1)
+Suggests: file
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.darwinsys.com/file/
+Description: Recognize the type of data in a file using "magic" numbers - development
+ This library can be used to classify files according to magic number
+ tests.
+ .
+ This package contains the development files.
+Original-Maintainer: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>
